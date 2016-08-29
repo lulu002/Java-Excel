@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -93,20 +94,21 @@ public class TestExcel {
         Sheet sheet = workbook.createSheet("testSimpleMapExport");
         SimpleExportService service = new SimpleExportService(sheet, getMapList(), new String[]{"id","kcmc","kclx"});
         //如果要表头可以像下面这样设置,不要表头可以不写
-        service.setLanguage(new ILanguage() {
-            @Override
-            public String translate(Object key, Object... args) {
-                if("id".equals(key)){
-                    return "序号";
-                }else if("kcmc".equals(key)){
-                    return "课程名称";
-                }else if("kclx".equals(key)){
-                    return "课程类型";
-                }
-                return key+"";
-            }
-        });
-        service.setDic("KCLX", "KCLX").addDic("KCLX", "1", "国家课程").addDic("KCLX", "2", "学校课程");//设置数据字典
+		service.setLanguage(new ILanguage() {
+			@Override
+			public String translate(Object key, Object... args) {
+				if (key==null) {
+					return "";
+				}
+				HashMap<String, String> map = new HashMap<String, String>();
+				map.put("id", "序号");
+				map.put("kcmc", "课程名称");
+				map.put("kclx", "课程类型");
+
+				return map.get(key.toString()) == null ? "" : map.get(key.toString());
+			}
+		});
+		service.setDic("kclx", "kclx").addDic("kclx", "1", "国家课程").addDic("kclx", "2", "学校课程");// 设置数据字典
         service.doExport();
         
         FileOutputStream fos = new FileOutputStream("D:/test-hashmap.xls");
